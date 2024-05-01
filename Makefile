@@ -6,7 +6,7 @@
 #    By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: Invalid date        by                   #+#    #+#              #
-#    Updated: 2024/04/23 13:42:45 by jseidere         ###   ########.fr        #
+#    Updated: 2024/04/29 12:47:07 by jseidere         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,23 +22,26 @@ WHITE = \033[38;5;231;1m
 BROWN = \033[38;5;137;1m
 END = \033[0m
 
-NAME = philoshers
+NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -g
+CFLAGS = -Wall -Wextra -Werror -g -pthread
 RFLAGS = -pthread
 DEPFLAGS =-MT $@ -MMD -MP -MF $(OBJ_DIR)/$*.d
 RM = rm -rf
 
-MAIN =	test.c
+MAIN =	main.c \
+		utils.c \
+		routine.c \
+		init.c \
 
 SRCS =	$(MAIN)
-			
+
 OBJ_DIR = object/
 OBJS =  $(addprefix $(OBJ_DIR), $(SRCS:.c=.o))
 DEPS = $(addprefix $(OBJ_DIR), $(SRCS:.c=.d))
 
-all: $(NAME) 
+all: $(NAME)
 
 object/%.o: source/%.c
 	@mkdir -p $(dir $@)
@@ -47,10 +50,7 @@ object/%.o: source/%.c
 
 $(NAME): $(OBJS) 
 	@$(CC) $(OBJS) $(CFLAGS) -o $(NAME) $(RFLAGS)
-	@$(RM) heredocs
-	@mkdir heredocs
 	@printf "\r$(GREEN)🚀 ./$(NAME)          created                                                                     \n$(END)"
-
 
 clean:
 	@$(RM) $(OBJ_DIR)
@@ -58,13 +58,11 @@ clean:
 
 fclean: clean cleanf
 	@$(RM) $(NAME)
-	@$(RM) test
-	@$(RM) heredocs
 	@printf "$(RED)💥 ./$(NAME) \t\tremoved\n$(END)"
 
 cleanf:
 	@find . -depth -maxdepth 1 -name ".git" -prune -o  -type f ! -name "*.c" ! -name "*.h" ! -name "*.json" ! -name "minishell" ! -name "README.md" ! -name ".gitignore" ! -name Makefile -delete 
-	@printf "$(RED)💥 test & useless files removed\n$(END)"
+	@printf "$(RED)$(END)"
 
 re: _rebuild fclean all
 
@@ -74,6 +72,9 @@ _rebuild:
 nothing:
 	@printf "💩$(BROWN) made $(RED)n$(ORANGE)o$(YELLOW)t$(GREEN)h$(BLUE)i$(INDIGO)n$(VIOLET)g\n$(END)"
 
+run:
+	@./$(NAME) 4 800 200 200 6
+
 -include $(DEPS)
 
-.PHONY: all bonus both clean fclean re _rebuild nothing
+.PHONY: all bonus both clean fclean re _rebuild nothing run
