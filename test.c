@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2028/08/23 10:55:06 by jseidere          #+#    #+#             */
-/*   Updated: 2024/04/23 14:57:42 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/02 12:45:19 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ void* routine()
         mails++;
         pthread_mutex_unlock(&mutex);
     }
-   // read mails    |23|23
-   // increment     |23|
-   // write mails   |28|25
+   // read mails    |23|24
+   // increment     |23|24
+   // write mails   |24|25
 }
 
 int main (int argc, char **argv)

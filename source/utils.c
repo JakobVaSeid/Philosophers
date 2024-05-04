@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/26 17:01:06 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/01 14:56:17 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/04 16:22:40 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,42 +40,111 @@ int	ft_atoi(const char *str)
 	return (number * counter);
 }
 
-long long gettime()
+long long	gettime(void)
 {
-    struct timeval time;
-    gettimeofday(&time, NULL);
-    return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
+	struct timeval	time;
+	gettimeofday(&time, NULL);
+	return ((time.tv_sec * 1000) + (time.tv_usec / 1000));
 }
 
-int my_usleep(long long time)
+bool	is_dead(t_program *program)
 {
-	long long start;
+	pthread_mutex_lock(&program->dead_lock);
+	if (program->one_is_dead)
+	{
+		pthread_mutex_unlock(&program->dead_lock);
+		return (true);
+	}
+	pthread_mutex_unlock(&program->dead_lock);
+	return (false);
+}
+
+bool	time_dead(t_program *program)
+{
+	pthread_mutex_lock(&program->eaten_lock);
+	if (gettime() - program->philo->last_meal > program->tt_die)
+	{
+		pthread_mutex_unlock(&program->eaten_lock);
+		return (true);
+	}
+	pthread_mutex_unlock(&program->eaten_lock);
+	return (false);
+}
+
+bool	finished_eating(t_program *program)
+{
+	pthread_mutex_lock(&program->eaten_lock);
+	if (program->finished_eating)
+	{
+		pthread_mutex_unlock(&program->eaten_lock);
+		return (true);
+	}
+	pthread_mutex_unlock(&program->eaten_lock);
+	return (false);
+}
+
+bool	all_eaten(t_program *program)
+{
+	pthread_mutex_lock(&program->eaten_lock);
+	if (program->philo->meals_eaten <= program->meals || program->meals == -1)
+	{
+		pthread_mutex_unlock(&program->eaten_lock);
+		return (false);
+	}
+	pthread_mutex_unlock(&program->eaten_lock);
+	return (true);
+}
+
+int	my_usleep(long long time, t_program *program)
+{
+	long long	start;
 
 	start = gettime();
-	while (gettime() - start < time)
+	while (!is_dead(program))
+	{
+		if (gettime() - start >= time)
+			return (1);
+		if (time_dead(program))
+		{
+			my_print(program->philo, "died\n");
+			pthread_mutex_lock(&program->dead_lock);
+			program->one_is_dead = true;
+			pthread_mutex_unlock(&program->dead_lock);
+			break ;
+		}
 		usleep(100);
+	}
 	return (0);
 }
 
-void *check_if_dead(void *philo)
+void	my_print(t_philo *phil, char *str)
 {
-	t_philo *phil = (t_philo *)philo;
-	while(!phil->program->finished_eating)
+	if (!is_dead(phil->program))
 	{
-		printf("Death_check_finished_eating\n");
-		//printf("One_is_dead: %d\n", phil->program->one_is_dead);
-		while(!phil->program->one_is_dead)
-		{
-			if (gettime() - phil->last_meal > phil->program->tt_die)
-			{
-				pthread_mutex_lock(phil->write_lock);
-				printf("%lld %d died\n", gettime() - phil->program->start_time, phil->id);
-				phil->is_dead = true;
-				pthread_mutex_unlock(phil->write_lock);
-			}
-		}
-		if(phil->program->one_is_dead)
-			return (NULL);
+		pthread_mutex_lock(&phil->program->write_lock);
+		printf("%lld %d %s", gettime() - phil->program->start_time, \
+		phil->id, str);
+		pthread_mutex_unlock(&phil->program->write_lock);
 	}
-	return (NULL);
 }
+
+void	free_all(t_program *program)
+{
+	int	i;
+
+	i = 0;
+	if (program->philo)
+	{
+		while (i < program->nbr_philos)
+		{
+			pthread_mutex_destroy(&program->forks[i]);
+			i++;
+		}
+		free(program->philo);
+	}
+	if (program->forks)
+		free(program->forks);
+	free(program);
+}
+
+//Deadlock
