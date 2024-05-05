@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 15:13:06 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/04 16:12:21 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/05 16:45:55 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ int	init_philo(t_program *program)
 		return (1);
 	program->forks = malloc(sizeof(pthread_mutex_t) * program->nbr_philos);
 	if (!program->forks)
-		return (1);
+		return (free(program->philo), 1);
 	while (i < program->nbr_philos)
 	{
 		program->philo[i].id = i + 1;
@@ -69,6 +69,7 @@ int	init_philo(t_program *program)
 		program->philo[i].last_meal = 0;
 		program->philo[i].program = program;
 		program->philo[i].program->one_is_dead = false;
+		program->philo[i].is_dead = &program->one_is_dead;
 		if (program->meals)
 			program->philo[i].meals_eaten = 0;
 		i++;

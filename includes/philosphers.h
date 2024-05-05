@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/23 10:55:26 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/04 16:32:00 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/05 17:06:42 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ typedef struct s_philo
 	int				id;
 	long long		last_meal;
 	int				meals_eaten;
+	bool			*is_dead;
 	pthread_mutex_t	*fork_l;
 	pthread_mutex_t	*fork_r;
 	t_program		*program;
@@ -61,16 +62,23 @@ int			destroy_mutex(t_program *program);
 //utils.c
 int			ft_atoi(const char *str);
 long long	gettime(void);
-int			my_usleep(long long time, t_program *program);
 void		free_all(t_program *program);
-void		my_print(t_philo *phil, char *str);
-bool		is_dead(t_program *program);
-bool		finished_eating(t_program *program);
-bool		all_eaten(t_program *program);
-bool		time_dead(t_program *program);
 
-//routine.c
+//to_dos.c
 int			ft_sleep(t_philo *philo);
 int			ft_think(t_philo *philo);
+int			ft_eat_even(t_philo *philo);
+int			ft_eat_uneven(t_philo *philo);
 int			ft_eat(t_philo *philo);
+
+//routine.c
+void		my_print(t_philo *phil, char *str);
+int			time_shift(t_philo *philo);
+int			my_usleep(long long time, t_philo *philo);
 void		*routine(void *philo);
+
+//checker.c
+bool		is_dead(t_philo *philo);
+bool		finished_eating(t_program *program);
+bool		all_eaten(t_program *program);
+bool		time_dead(t_philo *philo);
