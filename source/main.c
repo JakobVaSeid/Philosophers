@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/23 16:37:14 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/05 18:38:56 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/05 19:58:21 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,34 @@ int	check_args(int argc, char **argv)
 	return (1);
 }
 
+//check if philo is dead
+void *monitoring(void *void_monitoring)
+{
+	t_program	*program;
+	int			i;
+	
+	program = (t_program *)void_monitoring;
+	while (1)
+	{
+		i = 0;
+		while (i < program->nbr_philos)
+		{
+			if (time_dead(&program->philo[i]))
+			{
+				pthread_mutex_lock(&program->dead_lock);
+				program->one_is_dead = true;
+				pthread_mutex_unlock(&program->dead_lock);
+				return (NULL);
+			}
+			i++;
+		}
+	}
+}
+
 void	start_threads(t_program *program)
 {
 	int	i;
+	pthread_t	big_brother;
 
 	i = 0;
 	program->start_time = gettime();
@@ -75,6 +100,10 @@ void	start_threads(t_program *program)
 		pthread_mutex_unlock(&program->eaten_lock);
 		i++;
 	}
+	if (pthread_create(&big_brother, NULL, monitoring, program) != 0)
+		return ;
+	if (pthread_join(big_brother, NULL) != 0)
+		return ;
 	while (i-- > 0)
 	{
 		if (pthread_join(program->philo[i].id_thread, NULL) != 0)

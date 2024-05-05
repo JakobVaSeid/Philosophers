@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/26 18:48:36 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/05 18:46:25 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/05 20:09:59 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ int	time_shift(t_philo *philo)
 		{
 			result = philo->program->tt_eat - philo->program->tt_sleep;
 			my_usleep(result, philo);
-			usleep(100);
+			usleep(50);
 		}
 		else if (philo->program->tt_sleep > philo->program->tt_eat)
 		{
 			result = philo->program->tt_sleep - philo->program->tt_eat;
 			my_usleep(result, philo);
-			usleep(100);
+			usleep(50);
 		}
 	}
 	return (0);
@@ -52,9 +52,9 @@ int	my_usleep(long long time, t_philo *philo)
 	{
 		if (gettime() - start > time)
 			break ;
-		if (time_dead(philo))
-			break ;
-		usleep(150);
+		usleep(50);
+		/* if (time_dead(philo))
+			break ; */
 	}
 	return (0);
 }
