@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 15:13:06 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/05 16:45:55 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/10 18:22:13 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,31 +19,36 @@ int	init_mutex(t_program *program)
 	i = 0;
 	while (i < program->nbr_philos)
 	{
-		pthread_mutex_init(&program->forks[i], NULL);
+		if (pthread_mutex_init(&program->forks[i], NULL) != 0)
+		{
+			while (i > 0)
+			{
+				pthread_mutex_destroy(&program->forks[i]);
+				i--;
+			}
+			return (1);
+		}
 		i++;
 	}
-	if (pthread_mutex_init(&program->write_lock, NULL))
-		return (1);
-	if (pthread_mutex_init(&program->eaten_lock, NULL))
-		return (1);
-	if (pthread_mutex_init(&program->dead_lock, NULL))
-		return (1);
+	init_mutex2(program);
 	return (0);
 }
 
-int	destroy_mutex(t_program *program)
+int	init_mutex2(t_program *program)
 {
-	int	i;
-
-	i = 0;
-	while (i < program->nbr_philos)
+	if (pthread_mutex_init(&program->write_lock, NULL))
+		return (1);
+	if (pthread_mutex_init(&program->eaten_lock, NULL))
 	{
-		pthread_mutex_destroy(&program->forks[i]);
-		i++;
+		pthread_mutex_destroy(&program->write_lock);
+		return (1);
 	}
-	pthread_mutex_destroy(&program->write_lock);
-	pthread_mutex_destroy(&program->eaten_lock);
-	pthread_mutex_destroy(&program->dead_lock);
+	if (pthread_mutex_init(&program->dead_lock, NULL))
+	{
+		pthread_mutex_destroy(&program->write_lock);
+		pthread_mutex_destroy(&program->eaten_lock);
+		return (1);
+	}
 	return (0);
 }
 
@@ -82,15 +87,16 @@ int	init_prgm(t_program *program, int argc, char **argv)
 {
 	if (!program)
 		return (1);
-	program->nbr_philos = ft_atoi(argv[1]);
-	program->tt_die = ft_atoi(argv[2]);
-	program->tt_eat = ft_atoi(argv[3]);
-	program->tt_sleep = ft_atoi(argv[4]);
+	program->nbr_philos = ft_atol(argv[1]);
+	program->tt_die = ft_atol(argv[2]);
+	program->tt_eat = ft_atol(argv[3]);
+	program->tt_sleep = ft_atol(argv[4]);
 	if (argc == 6)
-		program->meals = ft_atoi(argv[5]);
+		program->meals = ft_atol(argv[5]);
 	else
 		program->meals = -1;
 	program->finished_eating = 0;
+	program->created_philos = 0;
 	return (0);
 }
 
@@ -99,10 +105,19 @@ int	init(t_program *program, int argc, char **argv)
 	if (!program)
 		return (1);
 	if (init_prgm(program, argc, argv))
-		return (1);
+	{
+		ft_putstr_fd("Error: Programm failed\n", 2);
+		return (free(program), 1);
+	}
 	if (init_philo(program))
-		return (1);
+	{
+		ft_putstr_fd("Error: Philo failed\n", 2);
+		return (free(program), 1);
+	}
 	if (init_mutex(program))
-		return (1);
+	{
+		ft_putstr_fd("Error: Mutex failed\n", 2);
+		return (free(program), 1);
+	}
 	return (0);
 }

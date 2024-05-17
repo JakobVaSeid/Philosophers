@@ -6,7 +6,7 @@
 #    By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: Invalid date        by                   #+#    #+#              #
-#    Updated: 2024/05/05 17:12:13 by jseidere         ###   ########.fr        #
+#    Updated: 2024/05/06 16:50:51 by jseidere         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,6 +36,7 @@ MAIN =	main.c \
 		init.c \
 		checker.c \
 		to_dos.c \
+		free.c
 
 SRCS =	$(MAIN)
 

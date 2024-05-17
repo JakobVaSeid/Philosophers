@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/05 16:59:34 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/05 20:10:59 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/07 19:12:27 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,14 @@ int	ft_think(t_philo *philo)
 int	ft_eat_even(t_philo *philo)
 {
 	pthread_mutex_lock(philo->fork_r);
-	my_print(philo, "has taken a fork\n");
 	pthread_mutex_lock(philo->fork_l);
 	my_print(philo, "has taken a fork\n");
+	my_print(philo, "has taken a fork\n");
+	my_print(philo, "is eating\n");
+	my_usleep(philo->program->tt_eat, philo);
 	pthread_mutex_lock(&philo->program->eaten_lock);
 	philo->last_meal = gettime();
 	pthread_mutex_unlock(&philo->program->eaten_lock);
-	my_print(philo, "is eating\n");
-	my_usleep(philo->program->tt_eat, philo);
 	pthread_mutex_unlock(philo->fork_l);
 	pthread_mutex_unlock(philo->fork_r);
 	pthread_mutex_lock(&philo->program->eaten_lock);
@@ -49,8 +49,8 @@ int	ft_eat_even(t_philo *philo)
 int	ft_eat_uneven(t_philo *philo)
 {
 	pthread_mutex_lock(philo->fork_l);
-	my_print(philo, "has taken a fork\n");
 	pthread_mutex_lock(philo->fork_r);
+	my_print(philo, "has taken a fork\n");
 	my_print(philo, "has taken a fork\n");
 	my_print(philo, "is eating\n");
 	my_usleep(philo->program->tt_eat, philo);

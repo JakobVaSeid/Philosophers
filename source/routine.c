@@ -6,7 +6,7 @@
 /*   By: jseidere <jseidere@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/26 18:48:36 by jseidere          #+#    #+#             */
-/*   Updated: 2024/05/05 20:09:59 by jseidere         ###   ########.fr       */
+/*   Updated: 2024/05/10 21:15:18 by jseidere         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ int	time_shift(t_philo *philo)
 		{
 			result = philo->program->tt_eat - philo->program->tt_sleep;
 			my_usleep(result, philo);
-			usleep(50);
+			usleep(500);
 		}
 		else if (philo->program->tt_sleep > philo->program->tt_eat)
 		{
 			result = philo->program->tt_sleep - philo->program->tt_eat;
 			my_usleep(result, philo);
-			usleep(50);
+			usleep(500);
 		}
 	}
 	return (0);
@@ -50,24 +50,22 @@ int	my_usleep(long long time, t_philo *philo)
 	start = gettime();
 	while (!is_dead(philo))
 	{
-		if (gettime() - start > time)
+		if (gettime() - start >= time)
 			break ;
 		usleep(50);
-		/* if (time_dead(philo))
-			break ; */
 	}
 	return (0);
 }
 
 void	my_print(t_philo *phil, char *str)
 {
+	pthread_mutex_lock(&phil->program->write_lock);
 	if (!is_dead(phil))
 	{
-		pthread_mutex_lock(&phil->program->write_lock);
 		printf("%lld %d %s", gettime() - phil->program->start_time, \
 		phil->id, str);
-		pthread_mutex_unlock(&phil->program->write_lock);
 	}
+	pthread_mutex_unlock(&phil->program->write_lock);
 }
 
 void	*routine(void *philo)
@@ -82,16 +80,11 @@ void	*routine(void *philo)
 	}
 	if (phil->id % 2 == 0)
 		usleep(150);
-	while (!is_dead(phil) && !finished_eating(phil->program))
+	while (!is_dead(phil))
 	{
 		ft_eat(phil);
-		if (phil->program->meals && all_eaten(phil->program))
-		{
-			pthread_mutex_lock(&phil->program->eaten_lock);
-			phil->program->finished_eating = 1;
-			pthread_mutex_unlock(&phil->program->eaten_lock);
+		if (finished_eating(phil))
 			break ;
-		}
 		ft_sleep(phil);
 		ft_think(phil);
 	}
